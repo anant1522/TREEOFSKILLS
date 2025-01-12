@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea, .form-group button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+        }
+        .data-section { margin-top: 40px; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        table th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <p>Manage hierarchical data: Age Groups → Subjects → Courses → Stages → Stage Details</p>
+
+        <!-- Age Group Form -->
+        <div class="form-group">
+            <h3>Add/Edit Age Group</h3>
+            <label for="age-group-input">Age Group:</label>
+            <input type="text" id="age-group-input" placeholder="e.g., 3-4 Years">
+            <button id="age-group-btn">Save Age Group</button>
+        </div>
+
+        <!-- Subject Form -->
+        <div class="form-group">
+            <h3>Add/Edit Subject</h3>
+            <label for="age-group-select">Select Age Group:</label>
+            <select id="age-group-select"></select>
+
+            <label for="subject-input">Subject:</label>
+            <input type="text" id="subject-input" placeholder="e.g., Chess">
+            <button id="subject-btn">Save Subject</button>
+        </div>
+
+        <!-- Course Form -->
+        <div class="form-group">
+            <h3>Add/Edit Course</h3>
+            <label for="subject-select">Select Subject:</label>
+            <select id="subject-select"></select>
+
+            <label for="course-input">Course:</label>
+            <input type="text" id="course-input" placeholder="e.g., Chess Basics">
+            <button id="course-btn">Save Course</button>
+        </div>
+
+        <!-- Stage Form -->
+        <div class="form-group">
+            <h3>Add/Edit Stage</h3>
+            <label for="course-select">Select Course:</label>
+            <select id="course-select"></select>
+
+            <label for="stage-input">Stage:</label>
+            <input type="text" id="stage-input" placeholder="e.g., Stage 1">
+            <button id="stage-btn">Save Stage</button>
+        </div>
+
+        <!-- Stage Details Form -->
+        <div class="form-group">
+            <h3>Add/Edit Stage Details</h3>
+            <label for="stage-select">Select Stage:</label>
+            <select id="stage-select"></select>
+
+            <label for="details-input">Details:</label>
+            <textarea id="details-input" rows="4" placeholder="Enter stage details"></textarea>
+            <button id="details-btn">Save Details</button>
+        </div>
+
+        <!-- Display Hierarchical Data -->
+        <div class="data-section">
+            <h3>Manage Data</h3>
+            <div id="data-display"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiUrl = 'backend.php';
+
+            // Fetch and populate dropdowns
+            function fetchDropdown(action, elementId, defaultText, keyName = 'name') {
+                fetch(`${apiUrl}?action=${action}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const select = document.getElementById(elementId);
+                        select.innerHTML = `<option value="">${defaultText}</option>`;
+                        data.forEach(item => {
+                            select.innerHTML += `<option value="${item.id}">${item[keyName]}</option>`;
+                        });
+                    })
+                    .catch(error => console.error('Error fetching dropdown:', error));
+            }
+
+            // CRUD operation handlers
+            function handleSave(action, data, callback) {
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(data)
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        alert(result.message);
+                        if (result.status === 'success' && callback) callback();
+                    })
+                    .catch(error => console.error('Error saving data:', error));
+            }
+
+            // Event listeners
+            document.getElementById('age-group-btn').addEventListener('click', () => {
+                const name = document.getElementById('age-group-input').value.trim();
+                if (!name) return alert('Please enter an age group.');
+
+                handleSave('addAgeGroup', { action: 'addAgeGroup', name }, () => {
+                    fetchDropdown('getAgeGroups', 'age-group-select', 'Select Age Group');
+                    document.getElementById('age-group-input').value = '';
+                });
+            });
+
+            document.getElementById('subject-btn').addEventListener('click', () => {
+                const name = document.getElementById('subject-input').value.trim();
+                const ageGroupId = document.getElementById('age-group-select').value;
+                if (!name || !ageGroupId) return alert('Please fill in all fields.');
+
+                handleSave('addSubject', { action: 'addSubject', name, age_group_id: ageGroupId }, () => {
+                    fetchDropdown('getSubjects', 'subject-select', 'Select Subject');
+                    document.getElementById('subject-input').value = '';
+                });
+            });
+
+            document.getElementById('course-btn').addEventListener('click', () => {
+                const name = document.getElementById('course-input').value.trim();
+                const subjectId = document.getElementById('subject-select').value;
+                if (!name || !subjectId) return alert('Please fill in all fields.');
+
+                handleSave('addCourse', { action: 'addCourse', name, subject_id: subjectId }, () => {
+                    fetchDropdown('getCourses', 'course-select', 'Select Course');
+                    document.getElementById('course-input').value = '';
+                });
+            });
+
+            document.getElementById('stage-btn').addEventListener('click', () => {
+                const name = document.getElementById('stage-input').value.trim();
+                const courseId = document.getElementById('course-select').value;
+                if (!name || !courseId) return alert('Please fill in all fields.');
+
+                handleSave('addStage', { action: 'addStage', name, course_id: courseId }, () => {
+                    fetchDropdown('getStages', 'stage-select', 'Select Stage');
+                    document.getElementById('stage-input').value = '';
+                });
+            });
+
+            document.getElementById('details-btn').addEventListener('click', () => {
+                const details = document.getElementById('details-input').value.trim();
+                const stageId = document.getElementById('stage-select').value;
+                if (!details || !stageId) return alert('Please fill in all fields.');
+
+                handleSave('addDetails', { action: 'addDetails', details, stage_id: stageId }, () => {
+                    document.getElementById('details-input').value = '';
+              });
+            });
+
+            // Initial data fetching
+            fetchDropdown('getAgeGroups', 'age-group-select', 'Select Age Group');
+            document.getElementById('age-group-select').addEventListener('change', () => {
+                const ageGroupId = document.getElementById('age-group-select').value;
+                if (ageGroupId) fetchDropdown(`getSubjects&age_group_id=${ageGroupId}`, 'subject-select', 'Select Subject');
+            });
+
+            document.getElementById('subject-select').addEventListener('change', () => {
+                const subjectId = document.getElementById('subject-select').value;
+                if (subjectId) fetchDropdown(`getCourses&subject_id=${subjectId}`, 'course-select', 'Select Course');
+            });
+
+            document.getElementById('course-select').addEventListener('change', () => {
+                const courseId = document.getElementById('course-select').value;
+                if (courseId) fetchDropdown(`getStages&course_id=${courseId}`, 'stage-select', 'Select Stage');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Course Selection</title>
+    <style>
+       body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+.form-container {
+    max-width: 800px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 50px auto;
+}
+
+.form-container h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.button-group button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+
+.button-group button:hover {
+    background-color: #6a11cb;
+    color: white;
+    transform: scale(1.05);
+}
+
+.button-group button.active {
+    background-color: #2575fc;
+    color: white;
+    font-weight: bold;
+    border: 1px solid #2575fc;
+    transform: scale(1.0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.details {
+    margin-top: 20px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    display: none;
+}
+
+/* Table Styles */
+.table-container {
+    width: 100%;
+    overflow-x: auto; /* Enable horizontal scrolling for small screens */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile devices */
+    margin: 20px auto;
+}
+
+table {
+    width: 100%; /* Full width */
+    border-collapse: collapse;
+    background-color: #222;
+    color: #fff;
+    margin: 0 auto; /* Center table */
+}
+
+th, td {
+    border: 1px solid #555;
+    text-align: center;
+    padding: 15px;
+    word-wrap: break-word; /* Handle long words */
+}
+
+th {
+    background-color: #000;
+    color: #fff;
+    font-size: 18px;
+}
+
+td {
+    font-size: 16px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    table {
+        font-size: 14px; /* Reduce font size */
+    }
+
+    th, td {
+        padding: 10px; /* Adjust padding */
+    }
+}
+
+@media (max-width: 480px) {
+    table {
+        font-size: 12px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Choose Your Option</h2>
+        <div class="button-group">
+            <button onclick="showProgramButtons(this)">Available Programmes</button>
+            <button onclick="showRegularProgramButtons(this)">Regular Programs</button>
+        </div>
+
+        <div id="program-buttons" class="button-group" style="display: none;">
+            <button onclick="showDetails(this, 'mcp')">MCP 6 Days 3 Hours in a week</button>
+            <button onclick="showDetails(this, 'mcp-lite')">MCP-LITE 6 Days 2 Hours in a week</button>
+            <button onclick="showDetails(this, 'cep')">CEP 5 Days 3 Hours in a week</button>
+            <button onclick="showDetails(this, 'cep-lite')">CEP-LITE 5 Days 2 Hours in a week</button>
+            <button onclick="showDetails(this, 'bcp')">BCP 5 Days 1 Hour in a week</button>
+        </div>
+
+        <div id="regular-program-buttons" class="button-group" style="display: none;">
+            <button onclick="showDetails(this, '1-subject')">1 Subject</button>
+            <button onclick="showDetails(this, '2-subject')">2 Subjects</button>
+            <button onclick="showDetails(this, '3-subject')">3 Subjects</button>
+        </div>
+
+        <div id="details" class="details"></div>
+    </div>
+
+    <script>
+        let lastClickedButton = null;
+
+        function setActiveButton(button) {
+            if (lastClickedButton) {
+                lastClickedButton.classList.remove('active');
+            }
+            button.classList.add('active');
+            lastClickedButton = button;
+        }
+
+        function showProgramButtons(button) {
+            setActiveButton(button);
+            const programButtons = document.getElementById('program-buttons');
+            programButtons.style.display = programButtons.style.display === 'none' ? 'flex' : 'none';
+
+            const regularProgramButtons = document.getElementById('regular-program-buttons');
+            regularProgramButtons.style.display = 'none'; // Hide regular programs
+
+            hideDetails();
+        }
+
+        function showRegularProgramButtons(button) {
+            setActiveButton(button);
+            const regularProgramButtons = document.getElementById('regular-program-buttons');
+            regularProgramButtons.style.display = regularProgramButtons.style.display === 'none' ? 'flex' : 'none';
+
+            const programButtons = document.getElementById('program-buttons');
+            programButtons.style.display = 'none'; // Hide available programs
+
+            hideDetails();
+        }
+
+        function showDetails(button, program) {
+            setActiveButton(button);
+            const details = document.getElementById('details');
+
+            let content = '';
+            switch (program) {
+                case 'mcp':
+                    content = `
+                        <h3>MCP 6 Days 3 Hours in a week</h3>
+                        <p><strong>Weekly Hours:</strong> 18 Hours</p>
+                        <p><strong>Max Subjects Can be Covered:</strong> 8; <strong>Minimum Subjects:</strong> 4</p>
+                        <p><strong>Compensation Day:</strong> 7th Day of the Week</p>
+                        <p><strong>Cost:88000 Rs</strong></p>
+                        <p><strong>Sample Schedule:</strong></p>
+                        <div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Time/Days</th>
+                <th>Day 1</th>
+                <th>Day 2</th>
+                <th>Day 3</th>
+                <th>Day 4</th>
+                <th>Day 5</th>
+                <th>Day 6</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Hour 1</td>
+                <td>S1 (Western Dance)</td>
+                <td>S4 (Piano)</td>
+                <td>S1 (Western Dance)</td>
+                <td>S4 (Piano)</td>
+                <td>S1 (Western Dance)</td>
+                <td>S2 (Table Tennis)</td>
+            </tr>
+            <tr>
+                <td>Hour 2</td>
+                <td>S2 (Table Tennis)</td>
+                <td>S5 (Vocals)</td>
+                <td>S7 (Fine Arts)</td>
+                <td>S5 (Vocals)</td>
+                <td>S2 (Table Tennis)</td>
+                <td>S8 (Guitar)</td>
+            </tr>
+            <tr>
+                <td>Hour 3</td>
+                <td>S3 (Drama)</td>
+                <td>S6 (Chess)</td>
+                <td>S3 (Drama)</td>
+                <td>S6 (Chess)</td>
+                <td>S8 (Guitar)</td>
+                <td>S7 (Fine Arts)</td>
+            </tr>
+        </tbody>
+    </table>
+                    `;
+                    break;
+                case 'mcp-lite':
+                    content = `
+                        <h3>MCP-LITE 6 Days 2 Hours in a week</h3>
+                        <p><strong>Weekly Hours:</strong> 12 Hours</p>
+                        <p><strong>Max Subjects Can be Covered:</strong> 4-5; <strong>Minimum Subjects:</strong> 3</p>
+                        <p><strong>Compensation Day:</strong> 7th Day of the Week</p>
+                        <p><strong>Cost:75000 Rs</strong></p>
+                        <p><strong>Sample Schedule:</strong></p>
+                        <div class="table-container">
+                        <table>
+        <tr>
+            <th>Time/Days</th>
+            <th>Day 1</th>
+            <th>Day 2</th>
+            <th>Day 3</th>
+            <th>Day 4</th>
+            <th>Day 5</th>
+        </tr>
+        <tr>
+            <td>Hour 1</td>
+            <td>S1(Western Dance)</td>
+            <td>S3(Piano)</td>
+            <td>S1(Western Dance)</td>
+            <td>S3(Piano)</td>
+            <td>S1(Western Dance)</td>
+        </tr>
+        <tr>
+            <td>Hour 2</td>
+            <td>S2(Table Tennis)</td>
+            <td>S4(Vocals)</td>
+            <td>S2(Table Tennis)</td>
+            <td>S4(Guitar)</td>
+            <td>S2(Table Tennis)</td>
+        </tr>
+    </table>
+                    `;
+                    break;
+                case 'cep':
+                    content = `
+                        <h3>CEP 5 Days 3 Hours in a week</h3>
+                        <p><strong>Weekly Hours:</strong> 15 Hours</p>
+                        <p><strong>Max Subjects Can be Covered:</strong> 7; <strong>Minimum Subjects:</strong> 4</p>
+                        <p><strong>Compensation Day:</strong> 6 & 7th Day of the Week</p>
+                        <p><strong>Cost:80000 Rs</strong></p>
+                        <p><strong>Sample Schedule:</strong></p>
+                        <div class="table-container">
+                        <table>
+    <tr>
+        <th >Time/Days</th>
+        <th >Day 1</th>
+        <th >Day 2</th>
+        <th >Day 3</th>
+        <th >Day 4</th>
+        <th >Day 5</th>
+    </tr>
+    <tr>
+        <td>Hour 1</td>
+        <td>S1(Western Dance)</td>
+        <td>S4(Piano)</td>
+        <td>S1(Western Dance)</td>
+        <td>S4(Piano)</td>
+        <td>S1(Western Dance)</td>
+    </tr>
+    <tr>
+        <td>Hour 2</td>
+        <td>S2(Table Tennis)</td>
+        <td>S5(Vocals)</td>
+        <td>S7(Fine Arts)</td>
+        <td>S5(Vocals)</td>
+        <td>S2(Table Tennis)</td>
+    </tr>
+    <tr>
+        <td>Hour 3</td>
+        <td>S3(Drama)</td>
+        <td>S6(Chess)</td>
+        <td>S3(Drama)</td>
+        <td>S6(Chess)</td>
+        <td>S7(Fine Arts)</td>
+    </tr>
+</table>
+
+
+                    `;
+                    break;
+                case 'cep-lite':
+                    content = `
+                        <h3>CEP-LITE 5 Days 2 Hours in a week</h3>
+                        <p><strong>Weekly Hours:</strong> 10 Hours</p>
+                        <p><strong>Max Subjects Can be Covered:</strong> 4-5; <strong>Minimum Subjects:</strong> 3</p>
+                        <p><strong>Compensation Day:</strong> 6 & 7th Day of the Week</p>
+                        <p><strong>Cost:70000 Rs</strong></p>
+                        <p><strong>Sample Schedule:</strong></p>
+                        <div class="table-container">
+                        <table>
+    <tr>
+        <th >Time/Days</th>
+        <th >Day 1</th>
+        <th >Day 2</th>
+        <th >Day 3</th>
+        <th >Day 4</th>
+        <th >Day 5</th>
+    </tr>
+    <tr>
+        <td>Hour 1</td>
+        <td>S1(Western Dance)</td>
+        <td>S3(Piano)</td>
+        <td>S1(Western Dance)</td>
+        <td>S3(Piano)</td>
+        <td>S1(Western Dance)</td>
+    </tr>
+    <tr>
+        <td>Hour 2</td>
+        <td>S2(Table Tennis)</td>
+        <td>S4(Vocals)</td>
+        <td>S2(Table Tennis)</td>
+        <td>S4(Guitar)</td>
+        <td>S2(Table Tennis)</td>
+    </tr>
+</table>
+
+                    `;
+                    break;
+                case 'bcp':
+                    content = `
+                        <h3>BCP 5 Days 1 Hour in a week</h3>
+                        <p><strong>Weekly Hours:</strong> 5 Hours</p>
+                        <p><strong>Max Subjects Can be Covered:</strong> 2-3; <strong>Minimum Subjects:</strong> 2</p>
+                        <p><strong>Compensation Day:</strong> 6 & 7th Day of the Week</p>
+                        <p><strong>Cost:38000 Rs</strong></p>
+                        <p><strong>Sample Schedule:</strong></p>
+                        <div class="table-container">
+                        <table>
+        <tr>
+            <th>Time/Days</th>
+            <th>Day 1</th>
+            <th>Day 2</th>
+            <th>Day 3</th>
+            <th>Day 4</th>
+            <th>Day 5</th>
+        </tr>
+        <tr>
+            <td>Hour 1</td>
+            <td>S1(Western Dance)</td>
+            <td>S2(Piano)</td>
+            <td>S1(Western Dance)</td>
+            <td>S2(Piano)</td>
+            <td>S1(Western Dance)</td>
+        </tr>
+    </table>
+                    `;
+                    break;
+                
+                    break;
+                case '1-subject':
+                    content = `
+                        <h3>1 Subject</h3>
+                        <p><strong>Hours:</strong> 2 Hours or 3 days a Week</p>
+                        <p><strong>Weekly Hours:</strong> 2 or 3</p>
+                        <p><strong>Compensation Day:</strong> Any other day of the week</p>
+                        <p>Cost: <strong> 24000 Rs</strong> year || <strong> 14000 Rs </strong> 6 month || <strong> 9000 Rs</strong> 3 month </strong></p>
+                        <p><strong>Sample Schedule:</strong></p>
+                        <div class="table-container">
+                        <table>
+        <tr>
+            <th>Time/Days</th>
+            <th>Day 1</th>
+            <th>Day 2</th>
+            <th>Day 3</th>
+        </tr>
+        <tr>
+            <td>Hour 1</td>
+            <td>S1(Western Dance)</td>
+            <td>S1(Western Dance)</td>
+            <td>S1(Western Dance)</td>
+        </tr>
+    </table>
+    <p><strong>Or</strong></p>
+    <div class="table-container">
+    <table>
+        <tr>
+            <th>Time/Days</th>
+            <th>Day 1</th>
+            <th>Day 2</th>
+        </tr>
+        <tr>
+            <td>Hour 1</td>
+            <td>S1(Guitar)</td>
+            <td>S1(Guitar)</td>
+        </tr>
+    </table>
+                    `;
+                    break;
+                case '2-subject':
+                    content = `
+                        <h3>2 Subject</h3>
+                        <p><strong>Hours:</strong> 2 Hours or 3 days a Week</p>
+                        <p><strong>Weekly Hours:</strong> 2 or 3</p>
+                        <p><strong>Compensation Day:</strong> Any other day of the week</p>
+                        <p>Cost: <strong> 38000 Rs </strong> year || <strong> 26000 Rs</strong>6 month || <strong> 16000 Rs </strong> 3 month </strong></p>
+                        <p><strong>Sample Schedule:</strong></p>
+                        <div class="table-container">
+                        <table>
+        <tr>
+            <th>Time/Days</th>
+            <th>Day 1</th>
+            <th>Day 2</th>
+            <th>Day 3</th>
+        </tr>
+        <tr>
+            <td>Hour 1</td>
+            <td>S1(Western Dance)</td>
+            <td>S1(Western Dance)</td>
+            <td>S1(Western Dance)</td>
+        </tr>
+        <tr>
+            <td>Hour 2</td>
+            <td>S2(Table Tennis)</td>
+            <td>S2(Table Tennis)</td>
+            <td>S2(Table Tennis)</td>
+        </tr>
+    </table>
+
+    <p><strong>Or</strong></p>
+    <div class="table-container">
+
+    <table>
+        <tr>
+            <th>Time/Days</th>
+            <th>Day 1</th>
+            <th>Day 2</th>
+            <th>Day 3</th>
+            <th>Day 4</th>
+            <th>Day 5</th>
+        </tr>
+        <tr>
+            <td>Hour 1</td>
+            <td>S1(Western Dance)</td>
+            <td>S2(Table Tennis)</td>
+            <td>S1(Western Dance)</td>
+            <td>S2(Table Tennis)</td>
+            <td>S1(Western Dance)</td>
+        </tr>
+    </table>
+
+    <p><strong>Or</strong></p>
+    <div class="table-container">
+
+    <table>
+        <tr>
+            <th>Time/Days</th>
+            <th>Day 1</th>
+            <th>Day 2</th>
+        </tr>
+        <tr>
+            <td>Hour 1</td>
+            <td>S1(Guitar)</td>
+            <td>S1(Guitar)</td>
+        </tr>
+        <tr>
+            <td>Hour 2</td>
+            <td>S2(Table Tennis)</td>
+            <td>S2(Table Tennis)</td>
+        </tr>
+    </table>
+                    `;
+                    break;
+                case '3-subject':
+                    content = `
+                        <h3>3 Subject</h3>
+                        <p><strong>Hours:</strong> 2-6 days a Week</p>
+                        <p><strong>Weekly Hours:</strong> 4 or 6</p>
+                        <p><strong>Compensation Day:</strong> Any other day of the week</p>
+                        <p>Cost:<strong> 48000 Rs</strong> year || <strong> 36000 Rs </strong> 6 month || <strong> 24000 Rs</strong> 3 month </strong></p>
+                        <p><strong>Sample Schedule:</strong></p>
+                        <div class="table-container">
+                        <table>
+        <tr>
+            <th>Time/Days</th>
+            <th>Day 1</th>
+            <th>Day 2</th>
+            <th>Day 3</th>
+        </tr>
+        <tr>
+            <td>Hour 1</td>
+            <td>S1(Western Dance)</td>
+            <td>S1(Western Dance)</td>
+            <td>S1(Western Dance)</td>
+        </tr>
+        <tr>
+            <td>Hour 2</td>
+            <td>S2(Table Tennis)</td>
+            <td>S2(Table Tennis)</td>
+            <td>S2(Table Tennis)</td>
+        </tr>
+        <tr>
+            <td>Hour 3</td>
+            <td>S3(Guitar)</td>
+            <td></td>
+            <td>S3(Guitar)</td>
+        </tr>
+    </table>
+
+    <h3>OR</h3>
+    <div class="table-container">
+
+    <table>
+        <tr>
+            <th>Time/Days</th>
+            <th>Day 1</th>
+            <th>Day 2</th>
+        </tr>
+        <tr>
+            <td>Hour 1</td>
+            <td>S1(Guitar)</td>
+            <td>S1(Guitar)</td>
+        </tr>
+        <tr>
+            <td>Hour 2</td>
+            <td>S2(Table Tennis)</td>
+            <td>S2(Table Tennis)</td>
+        </tr>
+        <tr>
+            <td>Hour 3</td>
+            <td>S3(Guitar)</td>
+            <td>S3(Guitar)</td>
+        </tr>
+    </table>
+                    `;
+                    break;
+            }
+
+            details.innerHTML = content;
+            details.style.display = 'block';
+        }
+
+        function hideDetails() {
+            const details = document.getElementById('details');
+            details.style.display = 'none';
+            details.innerHTML = '';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Discounts</title>
+    <style>
+        /* Styling remains the same */
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: white;
+            margin: 20px 0;
+        }
+
+        .columns-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 20px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .column {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            cursor: pointer;
+            overflow: hidden;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .column.expanded {
+            order: -1;
+            width: 100%;
+            padding: 30px;
+        }
+
+        .column h2 {
+            font-size: 1.5rem;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            display: none;
+            text-align: left;
+        }
+
+        .column.expanded .content {
+            display: block;
+            margin-top: 20px;
+        }
+
+        .content ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .content ul li {
+            margin-bottom: 15px;
+        }
+
+        .content ul li button {
+            display: block;
+            width: 100%;
+            background: #f9f9f9;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out;
+        }
+
+        .content ul li button:hover {
+            background: #e6f7ff;
+        }
+
+        .details {
+            display: none;
+            margin-top: 10px;
+            padding-left: 20px;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .details .condition, .details .discount {
+            margin-bottom: 5px;
+        }
+
+        .details strong {
+            color: #000;
+        }
+
+        @media (max-width: 768px) {
+            .column {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>Special Discount</h1>
+        <div class="columns-container">
+            <div class="column" onclick="toggleContent('new-admissions', this)">
+                <h2>New Admissions</h2>
+                <div id="new-admissions" class="content">
+                    <ul>
+                        <li>
+                            <button onclick="toggleDetails(event, 'sda-discount')">SDA Discount (Same Day Admission Discount)</button>
+                            <div id="sda-discount" class="details">
+                                <div class="condition"><strong>Condition:</strong> Applicable on the same day of front-page registration</div>
+                                <div class="discount"><strong>Discount:</strong> <strong>Flat 20%</strong></div>
+                                <p>valid upto <strong>31 dec 2024</strong>.</p>
+
+                            </div>
+                        </li>
+                        <li>
+                            <button onclick="toggleDetails(event, 'same-week-discount')">Same Week Admission Discount</button>
+                            <div id="same-week-discount" class="details">
+                                <div class="condition"><strong>Condition:</strong> Applicable on the same week of front-page registration</div>
+                                <div class="discount"><strong>Discount:</strong> <strong>Flat 15%</strong></div>
+                                <p>valid upto <strong>NA</strong>.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <button onclick="toggleDetails(event, 'referral-discount')">Referral Discount</button>
+                            <div id="referral-discount" class="details">
+                                <div class="condition"><strong>Condition:</strong> For the student who has referred will get discount in next cycle</div>
+                                <div class="discount"><strong>Discount:</strong> <strong>Flat 10%</strong></div>
+                                <p>valid upto <strong>NA</strong>.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <button onclick="toggleDetails(event, 'family-discount')">Family Discount</button>
+                            <div id="family-discount" class="details">
+                                <div class="condition"><strong>Condition:</strong> Students have to be in blood relation</div>
+                                <div class="discount"><strong>Discount:</strong> <strong>Flat 50% on second student</strong></div>
+                                <p>valid upto <strong>NA</strong>.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <button onclick="toggleDetails(event, 'more-subjects-discount')">More than Two Subjects</button>
+                            <div id="more-subjects-discount" class="details">
+                                <div class="condition"><strong>Condition:</strong> Single student has to take more than one subject</div>
+                                <div class="discount"><strong>Discount:</strong> <strong>Flat 50% on second subject onwards</strong></div>
+                                <p>valid upto <strong>NA</strong>.</p> 
+                            </div>
+                        </li>
+                        <li>
+                            <button onclick="toggleDetails(event, 'centre-discount')">Centre Discount</button>
+                            <div id="centre-discount" class="details">
+                                <div class="condition"><strong>Condition:</strong> EWS </div>
+                                <div class="discount"><strong>Discount:</strong> <strong>Flat 5%</strong></div>
+                                <p>valid upto <strong>NA</strong>.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Seasonal and Festival Discount Column -->
+            <div class="column" onclick="toggleContent('seasonal-discount', this)">
+                <h2>Seasonal and Festival Discount</h2>
+                <div id="seasonal-discount" class="content">
+                    <ul>
+                        <li>
+                            <button onclick="toggleDetails(event, 'festive-discount')">Festive Discount</button>
+                            <div id="festive-discount" class="details">
+                                <div class="condition"><strong>Condition:</strong> Not Available</div>
+
+                            </div>
+                        </li>
+                        <li>
+                            <button onclick="toggleDetails(event, 'year-end-discount')">Year End Discount</button>
+                            <div id="year-end-discount" class="details">
+                                <div class="condition"><strong>Condition:</strong>Valid for admission on 31 December 2024 or 1 January 2025</div>
+                                <div class="discount"><strong>Discount:</strong> <strong>Flat 40%</strong></div>
+                                <p>valid upto <strong>1 January 2025</strong>.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Renewal Discount Column -->
+            <div class="column" onclick="toggleContent('renewal-discount', this)">
+                <h2>Renewal Discount</h2>
+                <div id="renewal-discount" class="content">
+                    <ul>
+                        <li>
+                            <button onclick="toggleDetails(event, 'year-renewal-discount')">Year on Renewal</button>
+                            <div id="year-renewal-discount" class="details">
+                                <div class="condition"><strong>Condition:</strong> For yearly admission renewal</div>
+                                <div class="discount"><strong>Discount:</strong> <strong>Flat 20% on actual cost of the subject</strong></div>
+                                <p>valid upto <strong>NA</strong>.</p>
+
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleContent(contentId, element) {
+            const columns = document.querySelectorAll(".column");
+
+            columns.forEach(column => {
+                if (column === element) {
+                    column.classList.toggle("expanded");
+                } else {
+                    column.classList.remove("expanded");
+                }
+            });
+        }
+
+        function toggleDetails(event, detailsId) {
+            event.stopPropagation(); // Prevent triggering the parent column click
+            const details = document.getElementById(detailsId);
+
+            // Close all other details
+            const allDetails = document.querySelectorAll(".details");
+            allDetails.forEach(detail => {
+                if (detail !== details) {
+                    detail.style.display = "none";
+                }
+            });
+
+            // Toggle the selected detail
+            details.style.display = details.style.display === "block" ? "none" : "block";
+        }
+    </script>
+</body>
+</html>
